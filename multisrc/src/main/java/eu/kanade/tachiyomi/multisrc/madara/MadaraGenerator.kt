@@ -12,7 +12,7 @@ class MadaraGenerator : ThemeSourceGenerator {
     override val baseVersionCode: Int = 4
 
     override val sources = listOf(
-            SingleLang("24hRomance", "https://24hromance.com", "en", className = "Romance24h"),
+        SingleLang("Manhua ES -1", "https://manhuaes.com", "en", className = "ManhuaESmin"),
     )
 
     companion object {
