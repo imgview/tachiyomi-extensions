@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.extension.en.asurascansx
 import eu.kanade.tachiyomi.multisrc.wpmangastream.WPMangaStream
 import okhttp3.Headers
 
-class AsuraScansX : WPMangaStream("Asura Scans X", "https://asurascans.com", "en") {
+class AsuraScansX : WPMangaStream("Asura Scans X", "https://www.asurascans.com", "en") {
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
         .add(

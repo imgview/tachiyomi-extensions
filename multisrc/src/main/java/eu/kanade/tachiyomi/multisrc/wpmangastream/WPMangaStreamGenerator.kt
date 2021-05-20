@@ -12,7 +12,7 @@ class WPMangaStreamGenerator : ThemeSourceGenerator {
     override val baseVersionCode: Int = 4
 
     override val sources = listOf(
-        SingleLang("Asura Scans X", "https://asurascans.com", "en"),
+        SingleLang("Asura Scans X", "override url", "en", overrideVersionCode = 1),
     )
 
     companion object {
