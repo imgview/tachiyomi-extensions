@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - riz-ext
 
 jobs:
   check_wrapper:
@@ -27,11 +27,11 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Checkout master branch
+      - name: Checkout riz-ext branch
         uses: actions/checkout@v2
         with:
-          ref: master
-          path: master
+          ref: riz-ext
+          path: riz-ext
 
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
@@ -40,7 +40,7 @@ jobs:
 
       - name: Copy CI gradle.properties
         run: |
-          cd master
+          cd riz-ext
           mkdir -p ~/.gradle
           cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
 
@@ -49,8 +49,8 @@ jobs:
         env:
           CI_PUSH: "true"
         with:
-          build-root-directory: master
-          wrapper-directory: master
+          build-root-directory: riz-ext
+          wrapper-directory: riz-ext
           arguments: :multisrc:generateExtensions
           wrapper-cache-enabled: true
           dependencies-cache-enabled: true
@@ -61,8 +61,8 @@ jobs:
         env:
           CI_PUSH: "true"
         with:
-          build-root-directory: master
-          wrapper-directory: master
+          build-root-directory: riz-ext
+          wrapper-directory: riz-ext
           arguments: assembleRelease
           wrapper-cache-enabled: true
           dependencies-cache-enabled: true
@@ -71,7 +71,7 @@ jobs:
       - name: Sign APKs
         if: github.repository == 'tachiyomiorg/tachiyomi-extensions'
         run: |
-          cd master
+          cd riz-ext
           ./.github/scripts/sign-apks.sh \
             ${{ secrets.SIGNING_KEY }} \
             ${{ secrets.ALIAS }} \
@@ -81,7 +81,7 @@ jobs:
       - name: Create repo artifacts
         if: github.repository == 'tachiyomiorg/tachiyomi-extensions'
         run: |
-          cd master
+          cd riz-ext
           ./.github/scripts/create-repo.sh
 
       - name: Checkout repo branch
@@ -95,4 +95,4 @@ jobs:
         if: github.repository == 'tachiyomiorg/tachiyomi-extensions'
         run: |
           cd repo
-          ../master/.github/scripts/commit-repo.sh
+          ../riz-ext/.github/scripts/commit-repo.sh
