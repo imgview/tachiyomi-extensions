@@ -1,8 +1,13 @@
 package eu.kanade.tachiyomi.multisrc.madara
 
+import android.app.Application
+import android.content.SharedPreferences
+import android.widget.Toast
+//import eu.kanade.tachiyomi.extension.BuildConfig
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -22,6 +27,8 @@ import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import rx.Observable
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -32,11 +39,11 @@ import kotlin.random.Random
 
 abstract class Madara(
     override val name: String,
-    override val baseUrl: String,
     override val lang: String,
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.US)
-) : ParsedHttpSource() {
-
+        private val defaultBaseUrl: String,
+) : ConfigurableSource, ParsedHttpSource() {
+    override val baseUrl by lazy { getPrefBaseUrl() }
     override val supportsLatest = true
 
     override val client: OkHttpClient = network.cloudflareClient.newBuilder()
@@ -544,7 +551,43 @@ abstract class Madara(
 
     override fun imageUrlParse(document: Document) = throw UnsupportedOperationException("Not used")
 
+    private val preferences: SharedPreferences by lazy {
+        Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
+    }
+
+    private fun getPrefBaseUrl(): String = preferences.getString(BASE_URL_PREF, defaultBaseUrl)!!
+
+    override fun setupPreferenceScreen(screen: androidx.preference.PreferenceScreen) {
+        val baseUrlPref = androidx.preference.EditTextPreference(screen.context).apply {
+            key = BASE_URL_PREF_TITLE
+            title = BASE_URL_PREF_TITLE
+            summary = "$BASE_URL_PREF_SUMMARY\n\nCurrent: $baseUrl"
+            this.setDefaultValue(defaultBaseUrl)
+            dialogTitle = BASE_URL_PREF_TITLE
+            dialogMessage = "Default: $defaultBaseUrl"
+
+            setOnPreferenceChangeListener { _, newValue ->
+                try {
+                    val res = preferences.edit().putString(BASE_URL_PREF, newValue as String).commit()
+                    Toast.makeText(screen.context, RESTART_TACHIYOMI, Toast.LENGTH_LONG).show()
+                    res
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
+                }
+            }
+        }
+        screen.addPreference(baseUrlPref)
+    }
+
     companion object {
+        private const val RESTART_TACHIYOMI = "Restart Tachiyomi to apply new setting."
+
+        private const val BASE_URL_PREF_TITLE = "Override BaseUrl"
+        private val BASE_URL_PREF = "overrideBaseUrl_v${Random.nextInt().absoluteValue}"
+//        private val BASE_URL_PREF = "overrideBaseUrl_v${BuildConfig.VERSION_NAME}"
+        private const val BASE_URL_PREF_SUMMARY = "For temporary uses. Update extension will erase this setting."
+
         const val URL_SEARCH_PREFIX = "SLUG:"
     }
 }
