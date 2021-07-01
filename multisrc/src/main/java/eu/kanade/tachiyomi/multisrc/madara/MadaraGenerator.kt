@@ -9,10 +9,11 @@ class MadaraGenerator : ThemeSourceGenerator {
 
     override val themeClass = "Madara"
 
-    override val baseVersionCode: Int = 4
+    override val baseVersionCode: Int = 5
 
     override val sources = listOf(
         SingleLang("Manhua ES -1", "https://manhuaes.com", "en", className = "ManhuaESmin"),
+        SingleLang("PMScans Stash", "http://rya.pmscans.com", "en"),
     )
 
     companion object {
