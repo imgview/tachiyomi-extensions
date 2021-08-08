@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import eu.kanade.tachiyomi.multisrc.wpmangareader.WPMangaReader
 import eu.kanade.tachiyomi.source.model.Page
+import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
@@ -20,6 +21,10 @@ class FlameScansX : WPMangaReader(
     "en",
     "/series"
 ) {
+
+    override fun headersBuilder(): Headers.Builder = Headers.Builder()
+        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/90.0.818.62")
+        .add("Referer", "https://www.google.com")
 
     private val composedSelector: String = "#readerarea div.figure_container div.composed_figure"
 
