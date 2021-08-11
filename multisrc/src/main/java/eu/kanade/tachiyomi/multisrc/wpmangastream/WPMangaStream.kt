@@ -149,7 +149,7 @@ abstract class WPMangaStream(
                 status = parseStatus(infoElement.select("span:contains(Status:), .imptdt:contains(Status) i").firstOrNull()?.ownText())
                 author = isUseless(infoElement.select("span:contains(Author:), span:contains(Pengarang:), .fmed b:contains(Author)+span, .imptdt:contains(Author) i").firstOrNull()?.ownText())
                 artist = isUseless(infoElement.select(".fmed b:contains(Artist)+span, .imptdt:contains(Artist) i").firstOrNull()?.ownText())
-                description = infoElement.select("div.desc p, div.entry-content p, div[itemprop=description]").joinToString("\n") { it.text() }
+                description = infoElement.select("div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))").joinToString("\n") { it.text() }
                 thumbnail_url = infoElement.select("div.thumb img").imgAttr()
 
                 val genres = infoElement.select("span:contains(Genre) a, .mgen a")
