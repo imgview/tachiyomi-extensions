@@ -1,0 +1,17 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlinx-serialization'
+
+ext {
+    extName = 'MangaDex + EN'
+    pkgNameSuffix = 'all.mangadexplusen'
+    extClass = '.MangaDexFactory'
+    extVersionCode = 137
+    containsNsfw = true
+}
+
+dependencies {
+    implementation project(':lib-ratelimit')
+}
+
+apply from: "$rootDir/common.gradle"
