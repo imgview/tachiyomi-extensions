@@ -7,12 +7,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion(Config.compileSdk)
-    buildToolsVersion(Config.buildTools)
+    compileSdkVersion(AndroidConfig.compileSdk)
 
     defaultConfig {
         minSdkVersion(29)
-        targetSdkVersion(Config.targetSdk)
+        targetSdkVersion(AndroidConfig.targetSdk)
     }
 }
 
@@ -63,6 +62,14 @@ tasks {
                 throw Exception("Java process failed with exit code: $exitCode")
             }
         }
-        dependsOn("assembleDebug")
+        dependsOn("ktFormat", "ktLint", "assembleDebug")
+    }
+
+    register<org.jmailen.gradle.kotlinter.tasks.LintTask>("ktLint") {
+        source(files("src", "overrides"))
+    }
+
+    register<org.jmailen.gradle.kotlinter.tasks.FormatTask>("ktFormat") {
+        source(files("src", "overrides"))
     }
 }

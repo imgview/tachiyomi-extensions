@@ -59,10 +59,12 @@ interface ThemeSourceGenerator {
                 "SOURCEHOST" to source.baseUrl.toHttpUrlOrNull()?.host,
                 "SOURCESCHEME" to source.baseUrl.toHttpUrlOrNull()?.scheme
             ).filter { it.value != null }
-            gradle.writeText("""
+            gradle.writeText(
+                """
                 // THIS FILE IS AUTO-GENERATED; DO NOT EDIT
                 apply plugin: 'com.android.application'
                 apply plugin: 'kotlin-android'
+                apply plugin: 'kotlinx-serialization'
 
                 ext {
                     extName = '${source.name}'
@@ -70,7 +72,6 @@ interface ThemeSourceGenerator {
                     extClass = '.${source.className}'
                     extFactory = '$themePkg'
                     extVersionCode = ${baseVersionCode + source.overrideVersionCode + multisrcLibraryVersion}
-                    libVersion = '1.2'
                     ${if (source.isNsfw) "containsNsfw = true\n" else ""}
                 }
                 $defaultAdditionalGradleText
@@ -84,7 +85,8 @@ ${placeholders.map { "${" ".repeat(28)}${it.key}: \"${it.value}\""}.joinToString
                         ]
                     }
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
 
         private fun writeAndroidManifest(androidManifestFile: File, manifestOverridesPath: String, defaultAndroidManifestPath: String) {
@@ -95,11 +97,13 @@ ${placeholders.map { "${" ".repeat(28)}${it.key}: \"${it.value}\""}.joinToString
             else if (defaultAndroidManifest.exists())
                 defaultAndroidManifest.copyTo(androidManifestFile)
             else
-                androidManifestFile.writeText("""
+                androidManifestFile.writeText(
+                    """
                 <?xml version="1.0" encoding="utf-8"?>
                 <!-- THIS FILE IS AUTO-GENERATED; DO NOT EDIT -->
                 <manifest package="eu.kanade.tachiyomi.extension" />
-                """.trimIndent())
+                    """.trimIndent()
+                )
         }
 
         private fun createGradleProject(source: ThemeSourceData, themePkg: String, themeClass: String, baseVersionCode: Int, userDir: String) {
@@ -189,7 +193,8 @@ ${placeholders.map { "${" ".repeat(28)}${it.key}: \"${it.value}\""}.joinToString
                 }
             }
 
-            File("$classPath/${source.className}.kt").writeText("""/* ktlint-disable */
+            File("$classPath/${source.className}.kt").writeText(
+                """/* ktlint-disable */
                 // THIS FILE IS AUTO-GENERATED; DO NOT EDIT
                 package eu.kanade.tachiyomi.extension.${pkgNameSuffix(source, ".")}
 
@@ -199,7 +204,8 @@ ${placeholders.map { "${" ".repeat(28)}${it.key}: \"${it.value}\""}.joinToString
 
                 ${if (source.isNsfw) "\n@Nsfw" else ""}
                 ${factoryClassText()}
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
 
         private fun cleanDirectory(dir: File) {
