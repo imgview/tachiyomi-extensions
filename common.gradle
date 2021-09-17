@@ -1,8 +1,7 @@
 apply plugin: 'org.jmailen.kotlinter'
 
 android {
-    compileSdkVersion Config.compileSdk
-    buildToolsVersion Config.buildTools
+    compileSdkVersion AndroidConfig.compileSdk
 
     buildTypes {
         release {
@@ -25,11 +24,11 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion Config.minSdk
-        targetSdkVersion Config.targetSdk
+        minSdkVersion AndroidConfig.minSdk
+        targetSdkVersion AndroidConfig.targetSdk
         applicationIdSuffix pkgNameSuffix
         versionCode extVersionCode
-        versionName "$libVersion.$extVersionCode"
+        versionName project.ext.properties.getOrDefault("libVersion", "1.2") + ".$extVersionCode"
         setProperty("archivesBaseName", "tachiyomi-$pkgNameSuffix-v$versionName")
         manifestPlaceholders = [
                 appName : "Tachiyomi: $extName",
