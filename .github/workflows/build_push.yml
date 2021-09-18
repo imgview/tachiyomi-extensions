@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - riz-ext
 
 jobs:
   check_wrapper:
@@ -30,7 +30,7 @@ jobs:
       matrix:
         lang: [all, en, ar, ca, de, es, fr, id, it, ja, ko, pt, ru, th, tr, vi, zh, bg, hi, pl]
     steps:
-      - name: Checkout master branch
+      - name: Checkout riz-ext branch
         uses: actions/checkout@v2
 
       - name: Set up JDK
@@ -79,7 +79,7 @@ jobs:
       matrix:
         lang: [all, en, ar, ca, de, es, fr, id, it, ja, ko, pt, ru, th, tr, vi, zh, bg, hi, pl]
     steps:
-      - name: Checkout master branch
+      - name: Checkout riz-ext branch
         uses: actions/checkout@v2
 
       - name: Set up JDK
@@ -115,7 +115,7 @@ jobs:
     needs:
       - build_multisrc
       - build_individual
-    if: "github.repository == 'tachiyomiorg/tachiyomi-extensions'"
+    if: "github.repository == 'riztard/tachiyomi-extensions'"
     runs-on: ubuntu-latest
     steps:
       - name: Download APK artifacts
@@ -123,11 +123,11 @@ jobs:
         with:
           path: ~/apk-artifacts
 
-      - name: Checkout master branch
+      - name: Checkout riz-ext branch
         uses: actions/checkout@v2
         with:
-          ref: master
-          path: master
+          ref: riz-ext
+          path: riz-ext
 
       - name: Set up JDK
         uses: actions/setup-java@v1
@@ -136,7 +136,7 @@ jobs:
 
       - name: Sign APKs
         run: |
-          cd master
+          cd riz-ext
           ./.github/scripts/sign-apks.sh \
             ${{ secrets.SIGNING_KEY }} \
             ${{ secrets.ALIAS }} \
@@ -145,14 +145,14 @@ jobs:
 
       - name: Run inspector
         run: |
-          cd master
+          cd riz-ext
           INSPECTOR_LINK="$(curl -s "https://api.github.com/repos/tachiyomiorg/tachiyomi-extensions-inspector/releases/latest" | jq -r '.assets[0].browser_download_url')"
           curl -L "$INSPECTOR_LINK" -o ./Inspector.jar
           java -jar ./Inspector.jar "apk" "output.json" "tmp"
 
       - name: Create repo artifacts
         run: |
-          cd master
+          cd riz-ext
           ./.github/scripts/create-repo.sh
 
       - name: Checkout repo branch
@@ -164,4 +164,4 @@ jobs:
       - name: Deploy repo
         run: |
           cd repo
-          ../master/.github/scripts/commit-repo.sh
+          ../riz-ext/.github/scripts/commit-repo.sh
