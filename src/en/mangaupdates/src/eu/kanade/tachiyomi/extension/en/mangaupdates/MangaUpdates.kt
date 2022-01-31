@@ -25,7 +25,7 @@ class MangaUpdates : ParsedHttpSource() {
 
     override val client: OkHttpClient = network.cloudflareClient
 
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MM/dd/yy", Locale.US)
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     // Popular
 
@@ -110,7 +110,7 @@ class MangaUpdates : ParsedHttpSource() {
 
     // Chapters
     override fun chapterListRequest(manga: SManga) = chapterListRequest(
-        "$baseUrl/releases.html?stype=series&search=" +
+        "$baseUrl/releases.html?stype=series&perpage=100&search=" +
             manga.url.substringAfter("id=")
     )
 
@@ -128,7 +128,7 @@ class MangaUpdates : ParsedHttpSource() {
     }
 
     private fun parseChapterDate(date: String): Long {
-        return dateFormat.parse(date)?.time ?: 0L
+        return dateFormat.parse(date)?.time ?: 0
     }
 
     // Pages
