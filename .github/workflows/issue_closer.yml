@@ -41,5 +41,10 @@ jobs:
                 "regex": ".*(teamx|tqneplus|manga\\s*disk|komiktap|gourmet\\s*scans|manga\\s*crimson|mangawow|voidscans|hikari\\s*scans|mangagegecesi|piedpiperfb|knightnoscanlations|ahstudios|mangagecesi|flamescans).*",
                 "ignoreCase": true,
                 "message": "{match} will not be added back as the Scanlator team has requested it to be removed. Read #3475 for more information"
+              },
+              {
+                "type": "body",
+                "regex": ".*- [X] Im dumb .*",
+                "message": "Youre dumb."
               }
             ]
