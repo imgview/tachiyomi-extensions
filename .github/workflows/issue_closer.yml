@@ -44,7 +44,7 @@ jobs:
               },
               {
                 "type": "body",
-                "regex": ".*- [X] Im dumb will not fill out all of the requested information in this form..*",
+                "regex": ".*[X] Im dumb will not fill out.*",
                 "message": "Youre dumb."
               }
             ]
