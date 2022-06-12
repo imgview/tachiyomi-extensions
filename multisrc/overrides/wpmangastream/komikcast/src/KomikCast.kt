@@ -157,16 +157,7 @@ class KomikCast : WPMangaStream("Komik Cast", "https://komikcast.me", "id") {
     }
 
     override fun pageListParse(document: Document): List<Page> {
-        val imageListRegex = Regex("chapterImages = (.*) \\|\\|")
-        val imageListJson = imageListRegex.find(document.toString())!!.destructured.toList()[0]
-        val imageList = json.parseToJsonElement(imageListJson).jsonObject
-
-        var imageServer = "cdn"
-        if (!imageList.containsKey(imageServer)) imageServer = imageList.keys.first()
-        val imageElement = imageList[imageServer]!!.jsonArray.joinToString("")
-        val doc = Jsoup.parse(json.decodeFromString(imageElement))
-
-        return doc.select("img.size-full")
+        return document.select("div#chapter_body .main-reading-area img")
             .mapIndexed { i, img -> Page(i, "", img.attr("abs:Src")) }
     }
 
