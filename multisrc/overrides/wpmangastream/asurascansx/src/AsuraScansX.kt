@@ -16,5 +16,5 @@ class AsuraScansX : WPMangaStream("Asura Scans X", "https://www.asurascans.com",
         .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/90.0.818.62")
         .add("Referer", "https://www.google.com")
 
-    override val pageSelector = "div.rdminimal p noscript img"
+    override val pageSelector = "div.rdminimal img:not(.asurascans):not(.wp-image-22408)"
 }
