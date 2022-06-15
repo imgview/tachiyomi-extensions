@@ -11,6 +11,7 @@ import okhttp3.Request
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class MangaUpdates : ParsedHttpSource() {
@@ -109,26 +110,49 @@ class MangaUpdates : ParsedHttpSource() {
     }
 
     // Chapters
-    override fun chapterListRequest(manga: SManga) = chapterListRequest(
-        "$baseUrl/releases.html?stype=series&perpage=100&search=" +
-            manga.url.substringAfter("id=")
-    )
 
-    private fun chapterListRequest(mangaUrl: String): Request {
-        return GET(mangaUrl, headers)
-    }
-
-    override fun chapterListSelector() = "#main_content .p-2 .row.no-gutters> div:has(span):not(:has(a))"
+    override fun chapterListSelector() = ".sCat:contains(Release) + .sContent i:not(:contains(Search))"
 
     override fun chapterFromElement(element: Element) = SChapter.create().apply {
         val scanlators = element.nextElementSibling().text()
-        name = "Ch " + element.select("span").text() + " - " + scanlators
+        name = "Ch " + element.text() + " - " + scanlators
         url = name
-        date_upload = parseChapterDate(element.previousElementSibling().previousElementSibling().previousElementSibling().text())
+        date_upload = parseChapterDate(element.nextElementSibling().nextElementSibling().text())
     }
 
-    private fun parseChapterDate(date: String): Long {
-        return dateFormat.parse(date)?.time ?: 0
+    fun parseChapterDate(date: String): Long {
+        return if (date.endsWith("ago")) {
+            val value = date.split(' ')[0].toInt()
+            when {
+                "min" in date -> Calendar.getInstance().apply {
+                    add(Calendar.MINUTE, value * -1)
+                }.timeInMillis
+                "hour" in date -> Calendar.getInstance().apply {
+                    add(Calendar.HOUR_OF_DAY, value * -1)
+                }.timeInMillis
+                "day" in date -> Calendar.getInstance().apply {
+                    add(Calendar.DATE, value * -1)
+                }.timeInMillis
+                "week" in date -> Calendar.getInstance().apply {
+                    add(Calendar.DATE, value * 7 * -1)
+                }.timeInMillis
+                "month" in date -> Calendar.getInstance().apply {
+                    add(Calendar.MONTH, value * -1)
+                }.timeInMillis
+                "year" in date -> Calendar.getInstance().apply {
+                    add(Calendar.YEAR, value * -1)
+                }.timeInMillis
+                else -> {
+                    0L
+                }
+            }
+        } else {
+            try {
+                dateFormat.parse(date)?.time ?: 0
+            } catch (_: Exception) {
+                0L
+            }
+        }
     }
 
     // Pages
