@@ -13,7 +13,7 @@ class WPMangaReaderGenerator : ThemeSourceGenerator {
 
     override val sources = listOf(
         SingleLang("Flame Scans X", "https://flamescans.org", "en", overrideVersionCode = 1),
-        SingleLang("Luminous Scans", "https://www.luminousscans.com", "en", overrideVersionCode = 1),
+        SingleLang("Luminous Scans", "https://www.luminousscans.com", "en", overrideVersionCode = 2),
     )
 
     companion object {
