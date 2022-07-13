@@ -117,7 +117,7 @@ class MangaUpdates : ParsedHttpSource() {
         val scanlators = element.nextElementSibling().text()
         name = "Ch " + element.text() + " - " + scanlators
         url = name
-        date_upload = parseChapterDate(element.nextElementSibling().nextElementSibling().text())
+        date_upload = parseChapterDate(element.nextElementSibling().nextElementSibling().attr("title"))
     }
 
     fun parseChapterDate(date: String): Long {
