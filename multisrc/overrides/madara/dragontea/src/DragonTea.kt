@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import eu.kanade.tachiyomi.multisrc.madara.Madara
 import eu.kanade.tachiyomi.source.model.Page
+import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -24,11 +25,17 @@ class DragonTea : Madara(
     "en",
     dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.US)
 ) {
+    // idk if this help with cloudflare issue
     override val client: OkHttpClient = network.cloudflareClient.newBuilder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(::begonepeconIntercept)
+        .connectTimeout(1, TimeUnit.MINUTES)
+        .readTimeout(1, TimeUnit.MINUTES)
+        .retryOnConnectionFailure(true)
+        .followRedirects(true)
         .build()
+
+    override fun headersBuilder(): Headers.Builder = Headers.Builder()
+        .add("User-Agent", "Googlebot/2.1 (+http://www.googlebot.com/bot.html)")
+        .add("Referer", "https://www.google.com")
 
     override val useNewChapterEndpoint = true
 
