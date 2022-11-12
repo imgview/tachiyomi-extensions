@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.multisrc.madara
 
-import generator.ThemeSourceData.MultiLang
 import generator.ThemeSourceData.SingleLang
 import generator.ThemeSourceGenerator
 
@@ -10,10 +9,10 @@ class MadaraGenerator : ThemeSourceGenerator {
 
     override val themeClass = "Madara"
 
-    override val baseVersionCode: Int = 18
+    override val baseVersionCode: Int = 25
 
     override val sources = listOf(
-        SingleLang("DragonTea", "https://dragontea.ink", "en", overrideVersionCode = 2),
+//        SingleLang("DragonTea", "https://dragontea.ink", "en", overrideVersionCode = 2),
         SingleLang("Setsu Scans", "https://setsuscans.com", "en", overrideVersionCode = 1),
     )
 

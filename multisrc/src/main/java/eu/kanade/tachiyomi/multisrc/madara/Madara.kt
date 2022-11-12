@@ -24,8 +24,6 @@ import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import rx.Observable
-import rx.Single
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -39,8 +37,7 @@ abstract class Madara(
     override val name: String,
     override val baseUrl: String,
     final override val lang: String,
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.US),
-    protected val fetchGenresOnInit: Boolean = true
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.US)
 ) : ParsedHttpSource() {
 
     override val supportsLatest = true
@@ -61,11 +58,36 @@ abstract class Madara(
      */
     protected open val filterNonMangaItems = true
 
+    /**
+     * Automatically fetched genres from the source to be used in the filters.
+     */
+    private var genresList: List<Genre> = emptyList()
+
+    /**
+     * Inner variable to control the genre fetching failed state.
+     */
+    private var fetchGenresFailed: Boolean = false
+
+    /**
+     * Inner variable to control how much tries the genres request was called.
+     */
+    private var fetchGenresAttempts: Int = 0
+
+    /**
+     * Disable it if you don't want the genres to be fetched.
+     */
+    protected open val fetchGenres: Boolean = true
+
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
-        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/78.0$userAgentRandomizer")
+        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer")
         .add("Referer", baseUrl)
 
     // Popular Manga
+
+    override fun popularMangaParse(response: Response): MangasPage {
+        runCatching { fetchGenres() }
+        return super.popularMangaParse(response)
+    }
 
     // exclude/filter bilibili manga from list
     override fun popularMangaSelector() = "div.page-item-detail:not(:has(a[href*='bilibilicomics.com']))"
@@ -154,9 +176,9 @@ abstract class Madara(
      */
     open val useLoadMoreSearch = true
 
-    open fun searchFormBuilder(showOnlyManga: Boolean): FormBody.Builder = FormBody.Builder().apply {
+    open fun searchFormBuilder(page: Int, showOnlyManga: Boolean): FormBody.Builder = FormBody.Builder().apply {
         add("action", "madara_load_more")
-        add("page", "0")
+        add("page", (page - 1).toString())
         add("template", "madara-core/content/content-search")
         add("vars[paged]", "1")
         add("vars[template]", "archive")
@@ -164,7 +186,7 @@ abstract class Madara(
         add("vars[post_type]", "wp-manga")
         add("vars[post_status]", "publish")
         add("vars[manga_archives_item_layout]", "big_thumbnail")
-        add("vars[post_per_page]", "20")
+        add("vars[posts_per_page]", "20")
 
         if (filterNonMangaItems && showOnlyManga) {
             add("vars[meta_query][0][key]", "_wp_manga_chapter_type")
@@ -192,18 +214,6 @@ abstract class Madara(
             }
             .map { response ->
                 searchMangaParse(response)
-            }
-    }
-
-    protected open fun parseGenres(document: Document): List<Genre> {
-        return document.selectFirst("div.checkbox-group")
-            ?.select("div.checkbox")
-            .orEmpty()
-            .map { li ->
-                Genre(
-                    li.selectFirst("label").text(),
-                    li.selectFirst("input[type=checkbox]").`val`()
-                )
             }
     }
 
@@ -268,7 +278,7 @@ abstract class Madara(
         val showOnlyManga = filters.filterIsInstance<ShowOnlyMangaFilter>()
             .firstOrNull()?.state ?: true
 
-        val formBodyBuilder = searchFormBuilder(showOnlyManga).apply {
+        val formBodyBuilder = searchFormBuilder(page, showOnlyManga).apply {
             if (query.startsWith(URL_SEARCH_PREFIX)) {
                 add("vars[name]", query.removePrefix(URL_SEARCH_PREFIX))
 
@@ -484,6 +494,11 @@ abstract class Madara(
         else -> "Genres"
     }
 
+    protected open val genresMissingWarning: String = when (lang) {
+        "pt-BR" -> "Aperte 'Redefinir' para tentar mostrar os gêneros"
+        else -> "Press 'Reset' to attempt to show the genres"
+    }
+
     protected open val showOnlyMangaEntriesLabel: String = when (lang) {
         "pt-BR" -> "Mostrar somente mangás"
         else -> "Show only manga entries"
@@ -513,8 +528,6 @@ abstract class Madara(
 
     protected class ShowOnlyMangaFilter(label: String) : Filter.CheckBox(label, true)
 
-    private var genresList: List<Genre> = emptyList()
-
     override fun getFilterList(): FilterList {
         val filters = mutableListOf(
             AuthorFilter(authorFilterTitle),
@@ -540,6 +553,11 @@ abstract class Madara(
                 GenreConditionFilter(genreConditionFilterTitle, genreConditionFilterOptions),
                 GenreList(genreFilterTitle, genresList)
             )
+        } else if (fetchGenres) {
+            filters += listOf(
+                Filter.Separator(),
+                Filter.Header(genresMissingWarning)
+            )
         }
 
         return FilterList(filters)
@@ -555,6 +573,11 @@ abstract class Madara(
     }
 
     open class Tag(val id: String, name: String) : Filter.CheckBox(name)
+
+    override fun searchMangaParse(response: Response): MangasPage {
+        runCatching { fetchGenres() }
+        return super.searchMangaParse(response)
+    }
 
     override fun searchMangaSelector() = "div.c-tabs-item__content"
 
@@ -574,18 +597,30 @@ abstract class Madara(
         return manga
     }
 
-    override fun searchMangaNextPageSelector(): String? = "div.nav-previous, nav.navigation-ajax, a.nextpostslink"
+    override fun searchMangaNextPageSelector(): String? = when {
+        useLoadMoreSearch -> popularMangaNextPageSelector()
+        else -> "div.nav-previous, nav.navigation-ajax, a.nextpostslink"
+    }
 
     // Manga Details Parse
 
     protected val completedStatusList: Array<String> = arrayOf(
-        "Completed", "Completo", "Concluído", "Concluido", "Terminé", "Hoàn Thành", "مكتملة"
+        "Completed", "Completo", "Concluído", "Concluido", "Terminé", "Hoàn Thành", "مكتملة",
+        "مكتمل"
     )
 
     protected val ongoingStatusList: Array<String> = arrayOf(
-        "OnGoing", "Продолжается", "Updating", "Em Lançamento", "Em andamento", "Em Andamento",
-        "En cours", "Ativo", "Lançando", "Đang Tiến Hành", "Devam Ediyor", "Devam ediyor",
-        "In Corso", "In Arrivo", "مستمرة"
+        "OnGoing", "Продолжается", "Updating", "Em Lançamento", "Em lançamento", "Em andamento",
+        "Em Andamento", "En cours", "Ativo", "Lançando", "Đang Tiến Hành", "Devam Ediyor",
+        "Devam ediyor", "In Corso", "In Arrivo", "مستمرة", "مستمر", "En Curso"
+    )
+
+    protected val hiatusStatusList: Array<String> = arrayOf(
+        "On Hold"
+    )
+
+    protected val canceledStatusList: Array<String> = arrayOf(
+        "Canceled"
     )
 
     override fun mangaDetailsParse(document: Document): SManga {
@@ -618,22 +653,29 @@ abstract class Madara(
             }
             select(mangaDetailsSelectorStatus).last()?.let {
                 manga.status = when (it.text()) {
-                    // I don't know what's the corresponding for COMPLETED and LICENSED
-                    // There's no support for "Canceled" or "On Hold"
                     in completedStatusList -> SManga.COMPLETED
                     in ongoingStatusList -> SManga.ONGOING
+                    in hiatusStatusList -> SManga.ON_HIATUS
+                    in canceledStatusList -> SManga.CANCELLED
                     else -> SManga.UNKNOWN
                 }
             }
             val genres = select(mangaDetailsSelectorGenre)
-                .map { element -> element.text().toLowerCase(Locale.ROOT) }
+                .map { element -> element.text().lowercase(Locale.ROOT) }
                 .toMutableSet()
 
             // add tag(s) to genre
             if (mangaDetailsSelectorTag.isNotEmpty()) {
                 select(mangaDetailsSelectorTag).forEach { element ->
-                    if (genres.contains(element.text()).not()) {
-                        genres.add(element.text().toLowerCase(Locale.ROOT))
+                    if (genres.contains(element.text()).not() &&
+                        element.text().length <= 25 &&
+                        element.text().contains("read", true).not() &&
+                        element.text().contains(name, true).not() &&
+                        element.text().contains(name.replace(" ", ""), true).not() &&
+                        element.text().contains(manga.title, true).not() &&
+                        element.text().contains(altName, true).not()
+                    ) {
+                        genres.add(element.text().lowercase(Locale.ROOT))
                     }
                 }
             }
@@ -641,7 +683,7 @@ abstract class Madara(
             // add manga/manhwa/manhua thinggy to genre
             document.select(seriesTypeSelector).firstOrNull()?.ownText()?.let {
                 if (it.isEmpty().not() && it.notUpdating() && it != "-" && genres.contains(it).not()) {
-                    genres.add(it.toLowerCase(Locale.ROOT))
+                    genres.add(it.lowercase(Locale.ROOT))
                 }
             }
 
@@ -766,6 +808,8 @@ abstract class Madara(
 
     override fun chapterListSelector() = "li.wp-manga-chapter"
 
+    protected open fun chapterDateSelector() = "span.chapter-release-date"
+
     open val chapterUrlSelector = "a"
 
     open val chapterUrlSuffix = "?style=list"
@@ -784,7 +828,7 @@ abstract class Madara(
             // Added "title" alternative
             chapter.date_upload = select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let { parseRelativeDate(it) }
                 ?: select("span a").firstOrNull()?.attr("title")?.let { parseRelativeDate(it) }
-                ?: parseChapterDate(select("span.chapter-release-date").firstOrNull()?.text())
+                ?: parseChapterDate(select(chapterDateSelector()).firstOrNull()?.text())
         }
 
         return chapter
@@ -950,21 +994,44 @@ abstract class Madara(
         runCatching { client.newCall(request).execute().close() }
     }
 
-    init {
-        if (fetchGenresOnInit && genresList.isEmpty()) {
-            Single
-                .fromCallable {
-                    val genres = runCatching {
-                        client.newCall(GET("$baseUrl/?s=&post_type=wp-manga")).execute()
-                            .use { parseGenres(it.asJsoup()) }
-                    }
+    /**
+     * Fetch the genres from the source to be used in the filters.
+     */
+    protected open fun fetchGenres() {
+        if (fetchGenres && fetchGenresAttempts <= 3 && (genresList.isEmpty() || fetchGenresFailed)) {
+            val genres = runCatching {
+                client.newCall(genresRequest()).execute()
+                    .use { parseGenres(it.asJsoup()) }
+            }
 
-                    genresList = genres.getOrNull().orEmpty()
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe()
+            fetchGenresFailed = genres.isFailure
+            genresList = genres.getOrNull().orEmpty()
+            fetchGenresAttempts++
         }
+    }
+
+    /**
+     * The request to the search page (or another one) that have the genres list.
+     */
+    protected open fun genresRequest(): Request {
+        return GET("$baseUrl/?s=genre&post_type=wp-manga", headers)
+    }
+
+    /**
+     * Get the genres from the search page document.
+     *
+     * @param document The search page document
+     */
+    protected open fun parseGenres(document: Document): List<Genre> {
+        return document.selectFirst("div.checkbox-group")
+            ?.select("div.checkbox")
+            .orEmpty()
+            .map { li ->
+                Genre(
+                    li.selectFirst("label").text(),
+                    li.selectFirst("input[type=checkbox]").`val`()
+                )
+            }
     }
 
     companion object {
