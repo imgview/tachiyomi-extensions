@@ -10,16 +10,13 @@ import org.jsoup.nodes.Document
 import java.lang.IllegalArgumentException
 import java.util.concurrent.TimeUnit
 
-class RealmScans : MangaThemesia(
-    "Realm Scans",
-    "https://realmscans.com",
-    "en",
-    "/series"
-) {
+class RealmScans : MangaThemesia("Realm Scans", "https://realmscans.com", "en", "/series") {
 
     override val client: OkHttpClient = super.client.newBuilder()
         .rateLimit(1, 1, TimeUnit.SECONDS)
         .build()
+
+    override val pageSelector = "div#readerarea img:not([src*='svg'])"
 
     override fun pageListParse(document: Document): List<Page> {
         val htmlPages = document.select(pageSelector)
