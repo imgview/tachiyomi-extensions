@@ -34,10 +34,12 @@ class DragonTea : Madara(
         .build()
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
-        .add("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36")
-        .add("Referer", "$baseUrl/")
+        .add("User-Agent", "Mozilla/5.0 (Linux; Android 10; LM-Q710(FGN)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5359.128 Mobile Safari/537.36")
+        .add("Referer", "$baseUrl")
 
     override val useNewChapterEndpoint = true
+
+    override val chapterUrlSuffix = ""
 
     private val begonepeconSelector: String = "div.begonepecon"
 
