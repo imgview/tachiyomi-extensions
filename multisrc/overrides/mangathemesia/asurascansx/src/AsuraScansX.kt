@@ -46,7 +46,7 @@ class AsuraScansX : MangaThemesia(
         .add("Referer", "https://www.google.com")
 
     override val pageSelector = "div.rdminimal img:not(.size-full)"
-    
+
     override val seriesDescriptionSelector = "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))"
 
     // Permanent Url for Manga/Chapter End
