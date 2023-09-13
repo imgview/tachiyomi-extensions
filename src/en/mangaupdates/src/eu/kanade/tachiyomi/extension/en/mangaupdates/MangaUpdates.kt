@@ -77,14 +77,14 @@ class MangaUpdates : ParsedHttpSource() {
         val infoElement = document.select("#main_content .p-2 .row").first()
         val manga = SManga.create()
         manga.title = document.select(".releasestitle").text()
-        manga.genre = infoElement.select(".col-6 .sContent:nth-child(5):has(a) a:has(>u)").joinToString { it.text() }
+        manga.genre = infoElement?.select(".col-6 .sContent:nth-child(5):has(a) a:has(>u)")?.joinToString { it.text() }
 //        manga.status = parseStatus(infoElement.select(".post-info > span:eq(7)").text())
         var descSelector = "#div_desc_more"
         if (document.select("#div_desc_more").text().isNullOrBlank()) descSelector = ".sCat:contains(Description) + .sContent"
-        manga.description = infoElement.select(descSelector).firstOrNull()?.ownText()
+        manga.description = infoElement?.select(descSelector)?.firstOrNull()?.ownText()
         if (manga.description.toString() == "N/A") manga.description = ""
 
-        manga.thumbnail_url = infoElement.select(".sContent img.img-fluid").attr("abs:src")
+        manga.thumbnail_url = infoElement?.select(".sContent img.img-fluid")?.attr("abs:src")
 
         // add alternative name to manga description
         val altName = "Alternative Name" + ": "
@@ -114,10 +114,10 @@ class MangaUpdates : ParsedHttpSource() {
     override fun chapterListSelector() = ".sCat:contains(Release) + .sContent i:not(:contains(Search))"
 
     override fun chapterFromElement(element: Element) = SChapter.create().apply {
-        val scanlators = element.nextElementSibling().text()
+        val scanlators = element.nextElementSibling()?.text()
         name = "Ch " + element.text() + " - " + scanlators
         url = name
-        date_upload = parseChapterDate(element.nextElementSibling().nextElementSibling().attr("title"))
+        date_upload = parseChapterDate(element.nextElementSibling()?.nextElementSibling()!!.attr("title"))
     }
 
     fun parseChapterDate(date: String): Long {

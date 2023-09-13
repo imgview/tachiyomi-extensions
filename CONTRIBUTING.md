@@ -236,10 +236,10 @@ apply from: "$rootDir/common.gradle"
 | `pkgNameSuffix` | A unique suffix added to `eu.kanade.tachiyomi.extension`. The language and the site name should be enough. Remember your extension code implementation must be placed in this package. |
 | `extClass` | Points to the class that implements `Source`. You can use a relative path starting with a dot (the package name is the base path). This is used to find and instantiate the source(s). |
 | `extVersionCode` | The extension version code. This must be a positive integer and incremented with any change to the code. |
-| `libVersion` | (Optional, defaults to `1.3`) The version of the [extensions library](https://github.com/tachiyomiorg/extensions-lib) used. |
+| `libVersion` | (Optional, defaults to `1.4`) The version of the [extensions library](https://github.com/tachiyomiorg/extensions-lib) used. |
 | `isNsfw` | (Optional, defaults to `false`) Flag to indicate that a source contains NSFW content. |
 
-The extension's version name is generated automatically by concatenating `libVersion` and `extVersionCode`. With the example used above, the version would be `1.3.1`.
+The extension's version name is generated automatically by concatenating `libVersion` and `extVersionCode`. With the example used above, the version would be `1.4.1`.
 
 ### Core dependencies
 
@@ -254,6 +254,16 @@ Extensions rely on [extensions-lib](https://github.com/tachiyomiorg/extensions-l
 ```gradle
 dependencies {
     implementation(project(':lib-dataimage'))
+}
+```
+
+#### i18n library
+
+[`lib-i18n`](https://github.com/tachiyomiorg/tachiyomi-extensions/tree/master/lib/i18n) is a library for handling internationalization in the sources. It allows loading `.properties` files with messages located under the `assets/i18n` folder of each extension, that can be used to translate strings under the source.
+
+```gradle
+dependencies {
+    implementation(project(':lib-i18n'))
 }
 ```
 
@@ -297,7 +307,7 @@ a.k.a. the Browse source entry point in the app (invoked by tapping on the sourc
 - The app calls `fetchPopularManga` which should return a `MangasPage` containing the first batch of found `SManga` entries.
     - This method supports pagination. When user scrolls the manga list and more results must be fetched, the app calls it again with increasing `page` values (starting with `page=1`). This continues while `MangasPage.hasNextPage` is passed as `true` and `MangasPage.mangas` is not empty.
 - To show the list properly, the app needs `url`, `title` and `thumbnail_url`. You **must** set them here. The rest of the fields could be filled later (refer to Manga Details below).
-    - You should set `thumbnail_url` if is available, if not, `fetchMangaDetails` will be **immediately** called (this will increase network calls heavily and should be avoided).
+    - You should set `thumbnail_url` if is available, if not, `getMangaDetails` will be **immediately** called (this will increase network calls heavily and should be avoided).
 
 #### Latest Manga
 
@@ -314,7 +324,7 @@ a.k.a. the Latest source entry point in the app (invoked by tapping on the "Late
 
 ##### Filters
 
-The search flow have support to filters that can be added to a `FilterList` inside the `getFilterList` method. When the user changes the filters' state, they will be passed to the `searchRequest`, and they can be iterated to create the request (by getting the `filter.state` value, where the type varies depending on the `Filter` used). You can check the filter types available [here](https://github.com/tachiyomiorg/tachiyomi/blob/master/app/src/main/java/eu/kanade/tachiyomi/source/model/Filter.kt) and in the table below.
+The search flow have support to filters that can be added to a `FilterList` inside the `getFilterList` method. When the user changes the filters' state, they will be passed to the `searchRequest`, and they can be iterated to create the request (by getting the `filter.state` value, where the type varies depending on the `Filter` used). You can check the filter types available [here](https://github.com/tachiyomiorg/tachiyomi/blob/master/source-api/src/commonMain/kotlin/eu/kanade/tachiyomi/source/model/Filter.kt) and in the table below.
 
 | Filter | State type | Description |
 | ------ | ---------- | ----------- |
@@ -340,16 +350,19 @@ open class UriPartFilter(displayName: String, private val vals: Array<Pair<Strin
 
 #### Manga Details
 
-- When user taps on a manga, `fetchMangaDetails` and `fetchChapterList` will be called and the results will be cached.
+- When user taps on a manga, `getMangaDetails` and `getChapterList` will be called and the results will be cached.
     - A `SManga` entry is identified by it's `url`.
-- `fetchMangaDetails` is called to update a manga's details from when it was initialized earlier.
-    - `SManga.initialized` tells the app if it should call `fetchMangaDetails`. If you are overriding `fetchMangaDetails`, make sure to pass it as `true`.
+- `getMangaDetails` is called to update a manga's details from when it was initialized earlier.
+    - `SManga.initialized` tells the app if it should call `getMangaDetails`. If you are overriding `getMangaDetails`, make sure to pass it as `true`.
     - `SManga.genre` is a string containing list of all genres separated with `", "`.
     - `SManga.status` is an "enum" value. Refer to [the values in the `SManga` companion object](https://github.com/tachiyomiorg/extensions-lib/blob/master/library/src/main/java/eu/kanade/tachiyomi/source/model/SManga.kt#L24).
-    - During a backup, only `url` and `title` are stored. To restore the rest of the manga data, the app calls `fetchMangaDetails`, so all fields should be (re)filled in if possible.
-    - If a `SManga` is cached, `fetchMangaDetails` will be only called when the user does a manual update (Swipe-to-Refresh).
-- `fetchChapterList` is called to display the chapter list.
+    - During a backup, only `url` and `title` are stored. To restore the rest of the manga data, the app calls `getMangaDetails`, so all fields should be (re)filled in if possible.
+    - If a `SManga` is cached, `getMangaDetails` will be only called when the user does a manual update (Swipe-to-Refresh).
+- `getChapterList` is called to display the chapter list.
     - **The list should be sorted descending by the source order**.
+- `getMangaUrl` is called when the user taps "Open in WebView".
+  - If the source uses an API to fetch the data, consider overriding this method to return the manga absolute URL in the website instead.
+  - It defaults to the URL provided to the request in `mangaDetailsRequest`.
 
 #### Chapter
 
@@ -378,14 +391,18 @@ open class UriPartFilter(displayName: String, private val vals: Array<Pair<Strin
       - In older versions, the default date is always the fetch date.
       - In newer versions, this is the same if every (new) chapter has `0L` returned.
       - However, if the source only provides the upload date of the latest chapter, you can now set it to the latest chapter and leave other chapters default. The app will automatically set it (instead of fetch date) to every new chapter and leave old chapters' dates untouched.
+- `getChapterUrl` is called when the user taps "Open in WebView" in the reader.
+  - If the source uses an API to fetch the data, consider overriding this method to return the chapter absolute URL in the website instead.
+  - It defaults to the URL provided to the request in `pageListRequest`.
 
 #### Chapter Pages
 
-- When user opens a chapter, `fetchPageList` will be called and it will return a list of `Page`s.
+- When user opens a chapter, `getPageList` will be called and it will return a list of `Page`s.
 - While a chapter is open in the reader or is being downloaded, `fetchImageUrl` will be called to get URLs for each page of the manga if the `Page.imageUrl` is empty.
 - If the source provides all the `Page.imageUrl`'s directly, you can fill them and let the `Page.url` empty, so the app will skip the `fetchImageUrl` source and call directly `fetchImage`.
 - The `Page.url` and `Page.imageUrl` attributes **should be set as an absolute URL**.
 - Chapter pages numbers start from `0`.
+- The list of `Page`s should be returned already sorted, the `index` field is ignored.
 
 ### Misc notes
 
@@ -406,6 +423,15 @@ To test if the URL intent filter is working as expected, you can try opening the
 ```console
 $ adb shell am start -d "<your-link>" -a android.intent.action.VIEW
 ```
+
+#### Update strategy
+
+There is some cases where titles in a source will always only have the same chapter list (i.e. immutable), and don't need to be included in a global update of the app because of that, saving a lot of requests and preventing causing unnecessary damage to the source servers. To change the update strategy of a `SManga`, use the `update_strategy` field. You can find below a description of the current possible values.
+
+- `UpdateStrategy.ALWAYS_UPDATE`: Titles marked as always update will be included in the library update if they aren't excluded by additional restrictions.
+- `UpdateStrategy.ONLY_FETCH_ONCE`: Titles marked as only fetch once will be automatically skipped during library updates. Useful for cases where the series is previously known to be finished and have only a single chapter, for example.
+
+If not set, it defaults to `ALWAYS_UPDATE`.
 
 #### Renaming existing sources
 
@@ -492,6 +518,11 @@ multisrc
 - `multisrc/overrides/<themepkg>/<sourcepkg>/res` contains override for icons.
 - `multisrc/overrides/<themepkg>/<sourcepkg>/additional.gradle` defines additional gradle code, this will be copied at the end of the generated gradle file below the theme's `additional.gradle`.
 - `multisrc/overrides/<themepkg>/<sourcepkg>/AndroidManifest.xml` is copied as an override to the default `AndroidManifest.xml` generation if it exists.
+
+> **Note**
+>
+> Files ending with `Gen.kt` (i.e. `multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/<theme>/XxxGen.kt`)
+> are considered helper files and won't be copied to generated sources.
 
 ### Development workflow
 There are three steps in running and testing a theme source:

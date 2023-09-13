@@ -9,10 +9,9 @@ class MadaraGenerator : ThemeSourceGenerator {
 
     override val themeClass = "Madara"
 
-    override val baseVersionCode: Int = 25
+    override val baseVersionCode: Int = 31
 
     override val sources = listOf(
-        SingleLang("DragonTea", "https://dragontea.ink", "en", overrideVersionCode = 3),
         SingleLang("Reset Scans", "https://reset-scans.com", "en"),
         SingleLang("Setsu Scans", "https://setsuscans.com", "en", overrideVersionCode = 1),
     )

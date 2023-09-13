@@ -58,7 +58,7 @@ interface ThemeSourceGenerator {
             val additionalGradleOverrideText = File(additionalGradleOverridePath).readTextOrEmptyString()
             val placeholders = mapOf(
                 "SOURCEHOST" to source.baseUrl.toHttpUrlOrNull()?.host,
-                "SOURCESCHEME" to source.baseUrl.toHttpUrlOrNull()?.scheme
+                "SOURCESCHEME" to source.baseUrl.toHttpUrlOrNull()?.scheme,
             )
 
             val placeholdersStr = placeholders
@@ -92,7 +92,7 @@ interface ThemeSourceGenerator {
                 |        ]
                 |    }
                 |}
-                """.trimMargin()
+                """.trimMargin(),
             )
         }
 
@@ -108,13 +108,13 @@ interface ThemeSourceGenerator {
                     """
                     |<?xml version="1.0" encoding="utf-8"?>
                     |<!-- THIS FILE IS AUTO-GENERATED; DO NOT EDIT -->
-                    |<manifest package="eu.kanade.tachiyomi.extension" />
-                    """.trimMargin()
+                    |<manifest />
+                    """.trimMargin(),
                 )
             }
         }
 
-        private fun createGradleProject(source: ThemeSourceData, themePkg: String, themeClass: String, baseVersionCode: Int, userDir: String) {
+        fun createGradleProject(source: ThemeSourceData, themePkg: String, themeClass: String, baseVersionCode: Int, userDir: String) {
             // userDir = tachiyomi-extensions project root path
             val projectRootPath = "$userDir/generated-src/${pkgNameSuffix(source, "/")}"
             val projectSrcPath = "$projectRootPath/src/eu/kanade/tachiyomi/extension/${pkgNameSuffix(source, "/")}"
@@ -132,9 +132,9 @@ interface ThemeSourceGenerator {
             File(projectRootPath).let { projectRootFile ->
                 println("Generating $source")
 
-                projectRootFile.mkdirs()
                 // remove everything from past runs
-                cleanDirectory(projectRootFile)
+                projectRootFile.deleteRecursively()
+                projectRootFile.mkdirs()
 
                 writeGradle(projectGradleFile, source, themePkg, baseVersionCode, defaultAdditionalGradlePath, additionalGradleOverridePath)
                 writeAndroidManifest(projectAndroidManifestFile, manifestOverridePath, defaultAndroidManifestPath)
@@ -158,7 +158,7 @@ interface ThemeSourceGenerator {
                         Files.copy(
                             File("$path/$it").toPath(),
                             File("$projectRootPath/$it").toPath(),
-                            StandardCopyOption.REPLACE_EXISTING
+                            StandardCopyOption.REPLACE_EXISTING,
                         )
                     }
             }
@@ -171,19 +171,20 @@ interface ThemeSourceGenerator {
             File(themeDestPath).mkdirs()
 
             File(themeSrcPath).list()
-                ?.filter { it.endsWith(".kt") && !it.endsWith("Generator.kt") }
+                ?.filter { it.endsWith(".kt") && !it.endsWith("Generator.kt") && !it.endsWith("Gen.kt") }
                 ?.forEach { Files.copy(File("$themeSrcPath/$it").toPath(), File("$themeDestPath/$it").toPath(), StandardCopyOption.REPLACE_EXISTING) }
         }
 
         private fun copyResFiles(resOverridePath: String, defaultResPath: String, source: ThemeSourceData, projectRootPath: String): Any {
             // check if res override exists if not copy default res
             val resOverride = File(resOverridePath)
-            return if (resOverride.exists())
+            return if (resOverride.exists()) {
                 resOverride.copyRecursively(File("$projectRootPath/res"))
-            else
+            } else {
                 File(defaultResPath).let { defaultResFile ->
                     if (defaultResFile.exists()) defaultResFile.copyRecursively(File("$projectRootPath/res"))
                 }
+            }
         }
 
         private fun writeSourceClasses(projectSrcPath: String, srcOverridePath: String, source: ThemeSourceData, themePkg: String, themeClass: String) {
@@ -228,17 +229,8 @@ interface ThemeSourceGenerator {
                 |${if (source is ThemeSourceData.MultiLang) "import eu.kanade.tachiyomi.source.SourceFactory" else ""}
                 |
                 |${factoryClassText()}
-                """.trimMargin()
+                """.trimMargin(),
             )
-        }
-
-        private fun cleanDirectory(dir: File) {
-            dir.listFiles()?.forEach {
-                if (it.isDirectory) {
-                    cleanDirectory(it)
-                }
-                it.delete()
-            }
         }
     }
 }
