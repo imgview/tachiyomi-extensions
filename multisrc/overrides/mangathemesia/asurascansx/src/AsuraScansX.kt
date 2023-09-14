@@ -45,7 +45,7 @@ class AsuraScansX : MangaThemesia(
         .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/90.0.818.62")
         .add("Referer", "https://www.google.com")
 
-    override val pageSelector = "div.rdminimal img:not(.size-full)"
+    override val pageSelector = " div.rdminimal  img:not(.asurascans):not(a img)"
 
     override val seriesDescriptionSelector = "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))"
 
