@@ -183,7 +183,7 @@ class ReaperScans : ParsedHttpSource() {
     }
 
     // Chapters
-    override fun chapterListSelector() = "ul[role=list] li:has(svg)"
+    override fun chapterListSelector() = "div[wire:id] > div > ul[role=list] > li"
 
     override fun chapterListRequest(manga: SManga) = chapterListRequest(manga.url, 1)
 
