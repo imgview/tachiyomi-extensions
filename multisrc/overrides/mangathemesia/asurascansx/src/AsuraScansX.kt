@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 
 class AsuraScansX : MangaThemesia(
     "Asura Scans X",
-    "https://asuracomics.com",
+    "https://asuracomics.gg",
     "en",
     dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US),
 ) {
