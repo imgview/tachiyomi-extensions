@@ -16,6 +16,7 @@ import kotlinx.serialization.encodeToString
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -48,6 +49,8 @@ class AsuraScansX : MangaThemesia(
     override val pageSelector = "div.rdminimal img:not(.asurascans):not(a img:not([src*=\"notice\"])):not([src*=\"EndDesign\"])"
 
     override val seriesDescriptionSelector = "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))"
+    override val seriesArtistSelector = ".fmed b:contains(artist)+span, .infox span:contains(artist)"
+    override val seriesAuthorSelector = ".fmed b:contains(author)+span, .infox span:contains(author)"
 
     // Permanent Url for Manga/Chapter End
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -60,6 +63,22 @@ class AsuraScansX : MangaThemesia(
 
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         return super.fetchSearchManga(page, query, filters).tempUrlToPermIfNeeded()
+    }
+
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
+        val request = super.searchMangaRequest(page, query, filters)
+        if (query.isBlank()) return request
+
+        val url = request.url.newBuilder()
+            .addPathSegment("page/$page/")
+            .removeAllQueryParameters("page")
+            .removeAllQueryParameters("title")
+            .addQueryParameter("s", query)
+            .build()
+
+        return request.newBuilder()
+            .url(url)
+            .build()
     }
 
     // Temp Url for manga/chapter
