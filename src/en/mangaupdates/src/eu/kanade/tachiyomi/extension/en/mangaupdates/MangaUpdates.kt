@@ -89,7 +89,7 @@ class MangaUpdates : ParsedHttpSource() {
         // add alternative name to manga description
         val altName = "Alternative Name" + ": "
         document.select(".sCat:contains(Associated Names) + .sContent").html()
-            ?.replace("""<\s*br\s*/?>""".toRegex(), "\n")
+            ?.replace("""<\s*br\s*/?>""".toRegex(), "")
             ?.replace("""\n$""".toRegex(), "")
             ?.let {
                 if (it.isNullOrBlank().not()) {
