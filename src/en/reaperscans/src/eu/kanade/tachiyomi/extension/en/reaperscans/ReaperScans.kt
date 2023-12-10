@@ -36,7 +36,7 @@ class ReaperScans : ParsedHttpSource() {
 
     override val name = "Reaper Scans"
 
-    override val baseUrl = "https://reaperscans.com"
+    override val baseUrl = "https://reapercomics.com"
 
     override val lang = "en"
 
@@ -166,6 +166,7 @@ class ReaperScans : ParsedHttpSource() {
                 "Complete" -> SManga.COMPLETED
                 "Ongoing" -> SManga.ONGOING
                 "Dropped" -> SManga.CANCELLED
+                "Coming soon" -> SManga.ONGOING
                 else -> SManga.UNKNOWN
             }
 
