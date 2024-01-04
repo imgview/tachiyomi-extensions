@@ -36,7 +36,7 @@ class ReaperScans : ParsedHttpSource() {
 
     override val name = "Reaper Scans"
 
-    override val baseUrl = "https://reapercomics.com"
+    override val baseUrl = "https://reaperscans.com"
 
     override val lang = "en"
 
