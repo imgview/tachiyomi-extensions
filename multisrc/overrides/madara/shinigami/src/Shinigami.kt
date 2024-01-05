@@ -1,12 +1,11 @@
 package eu.kanade.tachiyomi.extension.id.shinigami
 
+import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.multisrc.madara.Madara
-import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.SChapter
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import org.jsoup.nodes.Element
-import java.util.concurrent.TimeUnit
 
 class Shinigami : Madara("Shinigami", "https://shinigami.moe", "id") {
     // moved from Reaper Scans (id) to Shinigami (id)
@@ -16,15 +15,18 @@ class Shinigami : Madara("Shinigami", "https://shinigami.moe", "id") {
 
     override fun searchPage(page: Int): String = if (page == 1) "" else "page/$page/"
 
-    override val client: OkHttpClient = super.client.newBuilder()
-        .rateLimit(4, 1, TimeUnit.SECONDS)
-        .build()
+    // disable random ua setting in ext
+    override val client: OkHttpClient = network.cloudflareClient
+
+    // remove random ua setting in ext
+    override fun setupPreferenceScreen(screen: PreferenceScreen) {}
 
     override fun headersBuilder(): Headers.Builder = super.headersBuilder()
         .add("Sec-Fetch-Dest", "document")
         .add("Sec-Fetch-Mode", "navigate")
         .add("Sec-Fetch-Site", "same-origin")
         .add("Upgrade-Insecure-Requests", "1")
+        .add("X-Requested-With", "")
 
     override val mangaSubString = "semua-series"
 
