@@ -3,7 +3,7 @@
 
 This repository contains the available extension catalogues for the [Tachiyomi](https://github.com/inorichi/tachiyomi) app.
 
-
+[//]: <> (halo gaes ngapain.)
 # Usage
 
 Extension sources can be downloaded, installed, and uninstalled via the main Tachiyomi app. They are installed and uninstalled like regular apps, in `.apk` format.
