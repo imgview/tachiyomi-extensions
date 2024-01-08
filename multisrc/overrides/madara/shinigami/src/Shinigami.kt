@@ -168,6 +168,15 @@ class Shinigami : Madara("Shinigami", "https://shinigami.moe", "id") {
         }
     }
 
+    // https://stackoverflow.com/a/66614516
+    private fun String.decodeHex(): ByteArray {
+        check(length % 2 == 0) { "Must have an even length" }
+
+        return chunked(2)
+            .map { it.toInt(16).toByte() }
+            .toByteArray()
+    }
+
     // remove random ua in setting ext from multisrc and use custom one
     override fun setupPreferenceScreen(screen: PreferenceScreen) {
         val prefCustomUserAgent = EditTextPreference(screen.context).apply {
