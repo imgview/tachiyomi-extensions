@@ -138,7 +138,6 @@ class Shinigami : Madara("Shinigami", "https://shinigami.moe", "id") {
     }
 
     // Page list
-
     @Serializable
     data class CDT(val ct: String, val s: String)
 
