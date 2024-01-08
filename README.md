@@ -1,33 +1,34 @@
-| Build | Support Server |
+### Please give the repo a :star:
+
+| Build | Official Server |
 |-------|---------|
 | [![CI](https://github.com/tachiyomiorg/tachiyomi-extensions/workflows/CI/badge.svg?event=push)](https://github.com/tachiyomiorg/tachiyomi-extensions/actions/workflows/build_push.yml) | [![Discord](https://img.shields.io/discord/349436576037732353.svg?label=discord&labelColor=7289da&color=2c2f33&style=flat)](https://discord.gg/tachiyomi) |
 
 # ![app icon](./.github/readme-images/app-icon.png)Tachiyomi Extensions
 Tachiyomi is a free and open source manga reader for Android 6.0 and above.
 
-This repository contains the available extension catalogues for the [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) app.
+## Guide
 
-# Usage
+### Tachiyomi v0.15+:
+1. Go to More → Settings → Browse
+2. Tap on "Extension repos" and then "Add" button at bottom
+3. Input "https://raw.githubusercontent.com/riztard/tachiyomi-extensions/repo/index.min.json"
+4. Enjoy!
 
-Extension sources can be downloaded, installed, and uninstalled via the main Tachiyomi app. They are installed and uninstalled like regular apps, in `.apk` format.
+### TachiyomiSY:
+1. Go to More → Settings → Browse
+2. Tap on "Edit repos" and then "Add" button at bottom
+3. Input "riztard/tachiyomi-extensions"
+4. Enjoy!
 
-## Downloads
+### TachiyomiAZ:
+1. Go to Settings → Browse
+2. Tap on "Edit repos" and then "+" button at bottom
+3. Input "riztard/tachiyomi-extensions"
+4. Enjoy!
 
-If you prefer to directly download the APK files, they are available via https://tachiyomi.org/extensions/ or directly in this GitHub repository in the [`repo` branch](https://github.com/tachiyomiorg/tachiyomi-extensions/tree/repo/apk).
-
-# Requests
-
-Source requests here are meant as up-for-grabs for any developer, thus it's impossible to provide a time estimation for any of them. Furthermore, some sites are impossible to do, usually because of various technical reasons.
-
-# Contributing
-
-Contributions are welcome!
-
-Check out the repo's [issue backlog](https://github.com/tachiyomiorg/tachiyomi-extensions/issues) for source requests and bug reports.
-
-To get started with development, see [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-It might also be good to read our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
+## Others:
+- If you're not using any of the above fork or if you prefer to directly download the APK files, they are available in this GitHub repository in the [`repo` branch](https://github.com/riztard/tachiyomi-extensions/tree/repo/apk).
 
 ## License
 
