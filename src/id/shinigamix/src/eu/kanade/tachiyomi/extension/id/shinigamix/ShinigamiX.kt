@@ -57,7 +57,28 @@ class ShinigamiX : HttpSource() {
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
         .add("X-Requested-With", "")
 
+    private val encodedString2 = "AAAApA" + "AAAHU" + "AAABisA" + "AAAVAA" + "AAGgAAAB" + "pAAAAbgA" + "AAGcAA" + "ABzAAAAdwAAA" + "HcAAAB3"
+
+    private val decodedString2 = Base64.decode(
+        encodedString2
+            .replace("ApA", "AbA")
+            .replace("BisA", "BsA", true),
+        Base64.DEFAULT,
+    )
+        .toString(Charsets.UTF_32).replace("www", "")
+
+    private val encodedString3 = "AAAAaQAAAH" + "kAAABhAAA" + "AaQAAAG4AAA" + "BapAkAAAeQ" + "AAAGEAAABpA" + "AAAbgAAAGkA" + "AAB5AAAAYQAAA" + "GkAAABuAAAAZ" + "AAAAGGGUAA" + "AAxAAAAMgA" + "AADMAAAA0"
+
+    private val decodedString3 = Base64.decode(
+        encodedString3
+            .replace("BaPAk", "BpA", true)
+            .replace("GGGUA", "GUA", true),
+        Base64.DEFAULT,
+    )
+        .toString(Charsets.UTF_32).substringBefore("4")
+
     private fun apiHeadersBuilder(): Headers.Builder = headersBuilder()
+        .add(decodedString2, decodedString3)
         .add("Accept", "application/json")
         .add("User-Agent", "okhttp/3.14.9")
 
