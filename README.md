@@ -9,7 +9,7 @@ Tachiyomi is a free and open source manga reader for Android 6.0 and above.
 
 ## Guide
 
-### Tachiyomi v0.15+ / TachiyomiSY / Mihon:
+### Tachiyomi v0.15+ / TachiyomiSY / TachiyomiJ2K 1.7.4+ / Mihon:
 1. Go to More → Settings → Browse
 2. Tap on "Extension repos" and then "Add" button at bottom
 3. Input "https://raw.githubusercontent.com/riztard/tachiyomi-extensions/repo/index.min.json"
