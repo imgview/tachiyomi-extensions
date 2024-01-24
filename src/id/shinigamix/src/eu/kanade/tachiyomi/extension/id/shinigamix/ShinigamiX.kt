@@ -21,6 +21,7 @@ import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 class ShinigamiX : HttpSource() {
 
@@ -51,11 +52,13 @@ class ShinigamiX : HttpSource() {
     private val apiUrl = decodedString
 
     override val client: OkHttpClient = super.client.newBuilder()
-        .rateLimit(12, 1, TimeUnit.SECONDS)
+        .rateLimit(24, 1, TimeUnit.SECONDS)
         .build()
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
-        .add("X-Requested-With", "")
+        .add("X-Requested-With", randomValue[Random.nextInt(randomValue.size)])
+
+    private val randomValue = listOf("com.opera.gx", "com.mi.globalbrowser.mini", "com.opera.browser", "com.duckduckgo.mobile.android", "com.brave.browser", "com.vivaldi.browser", "com.android.chrome")
 
     private val encodedString2 = "AAAApA" + "AAAHU" + "AAABisA" + "AAAVAA" + "AAGgAAAB" + "pAAAAbgA" + "AAGcAA" + "ABzAAAAdwAAA" + "HcAAAB3"
 
