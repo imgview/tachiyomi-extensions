@@ -51,7 +51,19 @@ class ShinigamiX : HttpSource() {
 
     private val apiUrl = decodedString
 
-    override val client: OkHttpClient = super.client.newBuilder()
+    override val client: OkHttpClient = network.cloudflareClient.newBuilder()
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val headers = request.headers.newBuilder().apply {
+                if (request.header("X-Requested-With")!!.isNotBlank()) {
+                    removeAll("X-Requested-With")
+                }
+            }.build()
+
+            chain.proceed(request.newBuilder().headers(headers).build())
+        }
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
         .rateLimit(24, 1, TimeUnit.SECONDS)
         .build()
 
