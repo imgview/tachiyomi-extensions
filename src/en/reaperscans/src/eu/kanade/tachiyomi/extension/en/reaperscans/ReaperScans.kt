@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.extension.en.reaperscans
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
+import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -12,6 +13,7 @@ import eu.kanade.tachiyomi.util.asJsoup
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -21,15 +23,18 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class ReaperScans : ParsedHttpSource() {
@@ -45,6 +50,10 @@ class ReaperScans : ParsedHttpSource() {
     override val supportsLatest = true
 
     private val json: Json by injectLazy()
+
+    override val client: OkHttpClient = network.cloudflareClient.newBuilder()
+        .rateLimit(20, 4, TimeUnit.SECONDS)
+        .build()
 
     // Popular
     override fun popularMangaRequest(page: Int) = GET("$baseUrl/comics?page=$page", headers)
@@ -186,33 +195,74 @@ class ReaperScans : ParsedHttpSource() {
     // Chapters
     override fun chapterListSelector() = "div[wire:id] > div > ul[role=list] > li"
 
-    override fun chapterListRequest(manga: SManga) = chapterListRequest(manga.url, 1)
-
-    private fun chapterListRequest(mangaUrl: String, page: Int): Request {
-        return GET("$baseUrl$mangaUrl?page=$page", headers)
-    }
-
-    // TO DO
-    // The final page of the chapter list(smaller chapters) does not display the chapter list in raw HTML.
-    // CSRF token thing is required.
     override fun chapterListParse(response: Response): List<SChapter> {
-        var document = response.asJsoup()
+        val document = response.asJsoup()
         val chapters = mutableListOf<SChapter>()
-        var nextPage = 2
+        document.select(chapterListSelector()).forEach { chapters.add(chapterFromElement(it)) }
+        var hasNextPage = document.selectFirst(chapterListNextPageSelector()) != null
 
-        document.select(chapterListSelector()).map { chapters.add(chapterFromElement(it)) }
+        if (!hasNextPage) {
+            return chapters
+        }
 
-        while (document.select("button[rel=\"next\"]").isNullOrEmpty().not()) {
-            val currentPage = document.select("div.flex-col > div:has(h1) ~ div a:first-child")
-                .attr("href").toString().substringBefore("/chapters/").substringAfter(baseUrl)
+        val csrfToken = document.selectFirst("meta[name=csrf-token]")?.attr("content")
+            ?: error("Couldn't find csrf-token")
 
-            document = client.newCall(chapterListRequest(currentPage, nextPage)).execute().asJsoup()
-            document.select(chapterListSelector()).map { chapters.add(chapterFromElement(it)) }
-            nextPage++
+        val livewareData = document.selectFirst("div[wire:initial-data*=Models\\\\Comic]")
+            ?.attr("wire:initial-data")
+            ?.parseJson<LiveWireDataDto>()
+            ?: error("Couldn't find LiveWireData")
+
+        val routeName = livewareData.fingerprint["name"]?.jsonPrimitive?.contentOrNull
+            ?: error("Couldn't find routeName")
+
+        val fingerprint = livewareData.fingerprint
+        var serverMemo = livewareData.serverMemo
+
+        var pageToQuery = 2
+
+        //  Javascript: (Math.random() + 1).toString(36).substring(8)
+        val generateId = { "1.${Random.nextLong().toString(36)}".substring(10) } // Not exactly the same, but results in a 3-5 character string
+        while (hasNextPage) {
+            val payload = buildJsonObject {
+                put("fingerprint", fingerprint)
+                put("serverMemo", serverMemo)
+                putJsonArray("updates") {
+                    addJsonObject {
+                        put("type", "callMethod")
+                        putJsonObject("payload") {
+                            put("id", generateId())
+                            put("method", "gotoPage")
+                            putJsonArray("params") {
+                                add(pageToQuery)
+                                add("page")
+                            }
+                        }
+                    }
+                }
+            }.toString().toRequestBody(JSON_MEDIA_TYPE)
+
+            val headers = Headers.Builder()
+                .add("x-csrf-token", csrfToken)
+                .add("x-livewire", "true")
+                .build()
+
+            val request = POST("$baseUrl/livewire/message/$routeName", headers, payload)
+
+            val responseData = client.newCall(request).execute().parseJson<LiveWireResponseDto>()
+
+            // response contains state that we need to preserve
+            serverMemo = serverMemo.mergeLeft(responseData.serverMemo)
+            val chaptersHtml = Jsoup.parse(responseData.effects.html, baseUrl)
+            chaptersHtml.select(chapterListSelector()).forEach { chapters.add(chapterFromElement(it)) }
+            hasNextPage = chaptersHtml.selectFirst(chapterListNextPageSelector()) != null
+            pageToQuery++
         }
 
         return chapters
     }
+
+    private fun chapterListNextPageSelector(): String = "button[wire:click*=nextPage]"
 
     override fun chapterFromElement(element: Element): SChapter {
         return SChapter.create().apply {
@@ -230,7 +280,7 @@ class ReaperScans : ParsedHttpSource() {
     override fun pageListParse(document: Document): List<Page> {
         return document.select("main div:has(img[loading]) img")
             .filterNot { it.attr("src").isNullOrEmpty() }
-            .mapIndexed { i, img -> Page(i, "", img.attr("abs:src")) }
+            .mapIndexed { i, img -> Page(i, "", img.imgAttr()) }
     }
 
     // Helpers
@@ -283,6 +333,8 @@ class ReaperScans : ParsedHttpSource() {
         hasAttr("data-cfsrc") -> attr("abs:data-cfsrc")
         else -> attr("abs:src")
     }
+
+    private fun Elements.imgAttr(): String = this.first()!!.imgAttr()
 
     // Unused
     override fun searchMangaNextPageSelector() = throw UnsupportedOperationException("Not Used")
