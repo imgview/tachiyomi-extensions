@@ -126,6 +126,27 @@
     ]
   },
   {
+    "name": "Tachiyomi: Rizz Comic X",
+    "pkg": "eu.kanade.tachiyomi.extension.en.rizzcomicx",
+    "apk": "tachiyomi-en.rizzcomicx-v1.4.4.apk",
+    "lang": "en",
+    "code": 4,
+    "version": "1.4.4",
+    "nsfw": 0,
+    "hasReadme": 0,
+    "hasChangelog": 0,
+    "sources": [
+      {
+        "name": "Rizz Comic X",
+        "lang": "en",
+        "id": "785897483515318921",
+        "baseUrl": "https://rizzcomic.com",
+        "versionId": 1,
+        "hasCloudflare": 1
+      }
+    ]
+  },
+  {
     "name": "Tachiyomi: Setsu Scans",
     "pkg": "eu.kanade.tachiyomi.extension.en.setsuscans",
     "apk": "tachiyomi-en.setsuscans-v1.4.32.apk",
