@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
-class ResetScans : Madara("Reset Scans", "https://reset-scans.us", "en") {
+class ResetScans : Madara("Reset Scans", "https://reset-scans.xyz", "en") {
 
     override val client: OkHttpClient = super.client.newBuilder()
         .rateLimit(20, 5, TimeUnit.SECONDS)
