@@ -107,12 +107,12 @@
   {
     "name": "Tachiyomi: Rizz Comic X",
     "pkg": "eu.kanade.tachiyomi.extension.en.rizzcomicx",
-    "apk": "tachiyomi-en.rizzcomicx-v1.4.4.apk",
+    "apk": "tachiyomi-en.rizzcomicx-v1.4.26.apk",
     "lang": "en",
-    "code": 4,
-    "version": "1.4.4",
+    "code": 26,
+    "version": "1.4.26",
     "nsfw": 0,
-    "hasReadme": 0,
+    "hasReadme": 1,
     "hasChangelog": 0,
     "sources": [
       {
