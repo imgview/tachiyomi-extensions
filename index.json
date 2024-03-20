@@ -23,10 +23,10 @@
   {
     "name": "Tachiyomi: Luminous Scans",
     "pkg": "eu.kanade.tachiyomi.extension.en.luminousscans",
-    "apk": "tachiyomi-en.luminousscans-v1.4.28.apk",
+    "apk": "tachiyomi-en.luminousscans-v1.4.29.apk",
     "lang": "en",
-    "code": 28,
-    "version": "1.4.28",
+    "code": 29,
+    "version": "1.4.29",
     "nsfw": 0,
     "hasReadme": 1,
     "hasChangelog": 0,
@@ -35,7 +35,7 @@
         "name": "Luminous Scans",
         "lang": "en",
         "id": "1019556752273106311",
-        "baseUrl": "https://luminousscans.com",
+        "baseUrl": "https://lumitoon.com",
         "versionId": 1,
         "hasCloudflare": 1
       }
