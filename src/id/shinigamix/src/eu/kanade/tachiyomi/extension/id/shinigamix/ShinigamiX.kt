@@ -25,9 +25,11 @@ import kotlin.random.Random
 
 class ShinigamiX : HttpSource() {
 
+    // aplikasi premium shinigami ID APK free gratis
+
     override val name = "Shinigami X"
 
-    override val baseUrl = "https://shinigamitoon.com"
+    override val baseUrl = "https://shinigami.cx"
 
     private val apiurl = "https://api.shinigami.ae"
 
@@ -98,8 +100,11 @@ class ShinigamiX : HttpSource() {
         .add("User-Agent", "okhttp/3.14.9")
 
     override fun popularMangaRequest(page: Int): Request {
+        // Adjust page number based on the pattern: 1, 3, 5, 7, ...
+        val adjustedPage = (page - 1) * 2 + 1
+
         val url = "$apiUrl/$API_BASE_PATH/filter/views".toHttpUrl().newBuilder()
-            .addQueryParameter("page", page.toString())
+            .addQueryParameter("page", adjustedPage.toString())
             .addQueryParameter("multiple", "true")
             .toString()
 
@@ -123,8 +128,11 @@ class ShinigamiX : HttpSource() {
     }
 
     override fun latestUpdatesRequest(page: Int): Request {
+        // Adjust page number based on the pattern: 1, 3, 5, 7, ...
+        val adjustedPage = (page - 1) * 2 + 1
+
         val url = "$apiUrl/$API_BASE_PATH/filter/latest".toHttpUrl().newBuilder()
-            .addQueryParameter("page", page.toString())
+            .addQueryParameter("page", adjustedPage.toString())
             .addQueryParameter("multiple", "true")
             .toString()
 
