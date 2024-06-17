@@ -46,7 +46,7 @@ class AsuraScansX : MangaThemesia(
     override val client: OkHttpClient = super.client.newBuilder()
         .addInterceptor(::urlChangeInterceptor)
         .addInterceptor(::domainChangeIntercept)
-        .rateLimit(20, 4, TimeUnit.SECONDS)
+        .rateLimit(10, 2, TimeUnit.SECONDS)
         .build()
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder()
@@ -320,7 +320,7 @@ class AsuraScansX : MangaThemesia(
         private const val PREF_PERM_MANGA_URL_SUMMARY = "Turns all manga urls into permanent ones."
         private const val PREF_URL_MAP = "pref_url_map"
         private const val BASE_URL_PREF = "pref_base_url_host"
-        private const val defaultBaseUrlHost = "asuratoon.com"
+        private const val defaultBaseUrlHost = "asuracomic.net"
         private val TEMP_TO_PERM_REGEX = Regex("""^\d+-""")
         private val titleSpecialCharactersRegex = Regex("""[^a-z0-9]+""")
         private val trailingPlusRegex = Regex("""\++$""")

@@ -13,7 +13,7 @@ class MangaThemesiaGenerator : ThemeSourceGenerator {
     override val baseVersionCode: Int = 26
 
     override val sources = listOf(
-        SingleLang("Asura Scans X", "https://asuracomic.net", "en", overrideVersionCode = 13),
+        SingleLang("Asura Scans X", "https://asuracomic.net", "en", overrideVersionCode = 14),
         SingleLang("Luminous Scans", "https://lumitoon.com", "en", overrideVersionCode = 3),
         SingleLang("Rizz Comic X", "https://rizzcomic.com", "en"),
     )
