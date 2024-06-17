@@ -2,10 +2,10 @@
   {
     "name": "Tachiyomi: Asura Scans X",
     "pkg": "eu.kanade.tachiyomi.extension.en.asurascansx",
-    "apk": "tachiyomi-en.asurascansx-v1.4.39.apk",
+    "apk": "tachiyomi-en.asurascansx-v1.4.40.apk",
     "lang": "en",
-    "code": 39,
-    "version": "1.4.39",
+    "code": 40,
+    "version": "1.4.40",
     "nsfw": 0,
     "hasReadme": 1,
     "hasChangelog": 0,
@@ -14,7 +14,7 @@
         "name": "Asura Scans X",
         "lang": "en",
         "id": "6694272628475835150",
-        "baseUrl": "https://asuratoon.com",
+        "baseUrl": "https://asuracomic.net",
         "versionId": 1,
         "hasCloudflare": 1
       }
