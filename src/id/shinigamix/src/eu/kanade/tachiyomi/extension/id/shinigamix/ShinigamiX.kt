@@ -29,9 +29,9 @@ class ShinigamiX : HttpSource() {
 
     override val name = "Shinigami X"
 
-    override val baseUrl = "https://shinigami.cx"
+    override val baseUrl = "https://shinigami03.com"
 
-    private val apiurl = "https://api.shinigami.ae"
+    private val apiUrl = "https://api.shinigami.ae"
 
     override val lang = "id"
 
@@ -40,18 +40,6 @@ class ShinigamiX : HttpSource() {
     private val json: Json by injectLazy()
 
     private val apiHeaders: Headers by lazy { apiHeadersBuilder().build() }
-
-    private val encodedString = "AAAAaAAAAHQAAAB0AAAAc" + "AAAADoAiBuAAAvAAAALwAAADEAA" + "AA1AAAANAAAbC4AAAAyAAAANgAABC4" + "AAAAxAAAAMwAAADMAAAAuAAAANg" + "AAADMAAAA6AAAAOAAAADAAAAA4AAAAMA=="
-
-    private val decodedString = Base64.decode(
-        encodedString
-            .replace("AbC", "AAC", true)
-            .replace("DoAiBu", "DoA", true),
-        Base64.DEFAULT,
-    )
-        .toString(Charsets.UTF_32)
-
-    private val apiUrl = decodedString
 
     override val client: OkHttpClient = network.cloudflareClient.newBuilder()
         .addInterceptor { chain ->
@@ -160,7 +148,11 @@ class ShinigamiX : HttpSource() {
     }
 
     override fun mangaDetailsRequest(manga: SManga): Request {
-        return GET("$apiUrl/$API_BASE_PATH/comic?url=${manga.url}", apiHeaders)
+        return GET(
+            "$apiUrl/$API_BASE_PATH/comic?url=${"$baseUrl/series/" +
+                manga.url.substringAfter("?url=").substringAfter("/series/")}",
+            apiHeaders,
+        )
     }
 
     override fun mangaDetailsParse(response: Response): SManga {
