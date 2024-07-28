@@ -1,8 +1,14 @@
 package eu.kanade.tachiyomi.extension.id.shinigamix
 
+import android.app.Application
+import android.content.SharedPreferences
 import android.util.Base64
+import android.widget.Toast
+import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -17,19 +23,23 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-class ShinigamiX : HttpSource() {
+class ShinigamiX : ConfigurableSource, HttpSource() {
 
     // aplikasi premium shinigami ID APK free gratis
 
     override val name = "Shinigami X"
 
-    override val baseUrl = "https://shinigami03.com"
+    override val baseUrl by lazy { getPrefBaseUrl() }
+
+    private var defaultBaseUrl = "https://shinigami03.com"
 
     private val apiUrl = "https://api.shinigami.ae"
 
@@ -40,6 +50,10 @@ class ShinigamiX : HttpSource() {
     private val json: Json by injectLazy()
 
     private val apiHeaders: Headers by lazy { apiHeadersBuilder().build() }
+
+    private val preferences: SharedPreferences by lazy {
+        Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
+    }
 
     override val client: OkHttpClient = network.cloudflareClient.newBuilder()
         .addInterceptor { chain ->
@@ -144,7 +158,7 @@ class ShinigamiX : HttpSource() {
     override fun searchMangaParse(response: Response): MangasPage = popularMangaParse(response)
 
     override fun getMangaUrl(manga: SManga): String {
-        return manga.url.substringAfter("?url=")
+        return "$baseUrl/series/" + manga.url.substringAfter("/series/")
     }
 
     override fun mangaDetailsRequest(manga: SManga): Request {
@@ -168,6 +182,17 @@ class ShinigamiX : HttpSource() {
             genre = getValue(mangaDetails.detailList, "Genre(s)") +
                 if (type.isNullOrBlank().not()) ", $type" else ""
         }
+    }
+
+    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
+        return client.newCall(mangaDetailsRequest(manga))
+            .asObservableSuccess()
+            .map {
+                mangaDetailsParse(it).apply {
+                    thumbnail_url = "$baseUrl/wp-content/" +
+                        manga.thumbnail_url?.substringAfter("/wp-content/")
+                }
+            }
     }
 
     private fun getValue(detailList: List<ShinigamiXMangaDetailListDto>?, name: String): String {
@@ -235,6 +260,36 @@ class ShinigamiX : HttpSource() {
         else -> SManga.UNKNOWN
     }
 
+    override fun setupPreferenceScreen(screen: PreferenceScreen) {
+        val baseUrlPref = androidx.preference.EditTextPreference(screen.context).apply {
+            key = BASE_URL_PREF
+            title = BASE_URL_PREF_TITLE
+            summary = BASE_URL_PREF_SUMMARY
+            this.setDefaultValue(defaultBaseUrl)
+            dialogTitle = BASE_URL_PREF_TITLE
+            dialogMessage = "Default: $defaultBaseUrl"
+
+            setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(screen.context, RESTART_APP, Toast.LENGTH_LONG).show()
+                true
+            }
+        }
+        screen.addPreference(baseUrlPref)
+    }
+
+    private fun getPrefBaseUrl(): String = preferences.getString(BASE_URL_PREF, defaultBaseUrl)!!
+
+    init {
+        preferences.getString(DEFAULT_BASE_URL_PREF, null).let { prefDefaultBaseUrl ->
+            if (prefDefaultBaseUrl != defaultBaseUrl) {
+                preferences.edit()
+                    .putString(BASE_URL_PREF, defaultBaseUrl)
+                    .putString(DEFAULT_BASE_URL_PREF, defaultBaseUrl)
+                    .apply()
+            }
+        }
+    }
+
     companion object {
         private const val API_BASE_PATH = "api/v1"
         private const val API_BASE_PATH_2 = "api/v2"
@@ -242,5 +297,11 @@ class ShinigamiX : HttpSource() {
         private val DATE_FORMATTER by lazy {
             SimpleDateFormat("MMMM dd, yyyy", Locale.ENGLISH)
         }
+
+        private const val RESTART_APP = "Untuk menerapkan perubahan, restart aplikasi."
+        private const val BASE_URL_PREF_TITLE = "Ubah Domain"
+        private const val BASE_URL_PREF = "overrideBaseUrl"
+        private const val BASE_URL_PREF_SUMMARY = "Untuk penggunaan sementara. Memperbarui ekstensi akan menghapus pengaturan. \n\n❗ Gunakan hanya pada saat manga yang sudah ditambahkan di library bermasalah, sedangkan normal untuk yang tidak. ❗"
+        private const val DEFAULT_BASE_URL_PREF = "defaultBaseUrl"
     }
 }
