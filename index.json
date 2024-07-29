@@ -84,27 +84,6 @@
     ]
   },
   {
-    "name": "Tachiyomi: Reset Scans",
-    "pkg": "eu.kanade.tachiyomi.extension.en.resetscans",
-    "apk": "tachiyomi-en.resetscans-v1.4.34.apk",
-    "lang": "en",
-    "code": 34,
-    "version": "1.4.34",
-    "nsfw": 0,
-    "hasReadme": 0,
-    "hasChangelog": 0,
-    "sources": [
-      {
-        "name": "Reset Scans",
-        "lang": "en",
-        "id": "8894279497795073184",
-        "baseUrl": "https://reset-scans.xyz",
-        "versionId": 1,
-        "hasCloudflare": 1
-      }
-    ]
-  },
-  {
     "name": "Tachiyomi: Rizz Comic X",
     "pkg": "eu.kanade.tachiyomi.extension.en.rizzcomicx",
     "apk": "tachiyomi-en.rizzcomicx-v1.4.26.apk",
