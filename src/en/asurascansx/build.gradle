@@ -5,7 +5,7 @@ ext {
     extName = 'Asura Scans X'
     pkgNameSuffix = 'en.asurascansx'
     extClass = '.AsuraScansX'
-    extVersionCode = 42
+    extVersionCode = 43
 }
 
 apply from: "$rootDir/common.gradle"
