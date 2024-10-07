@@ -684,20 +684,20 @@
     ]
   },
   {
-    "name": "Tachiyomi: Asura Scans",
-    "pkg": "eu.kanade.tachiyomi.extension.en.asurascans",
-    "apk": "tachiyomi-en.asurascans-v1.4.41.apk",
+    "name": "Tachiyomi: Asura Scans X",
+    "pkg": "eu.kanade.tachiyomi.extension.en.asurascansx",
+    "apk": "tachiyomi-en.asurascansx-v1.4.43.apk",
     "lang": "en",
-    "code": 41,
-    "version": "1.4.41",
+    "code": 43,
+    "version": "1.4.43",
     "nsfw": 0,
     "hasReadme": 0,
     "hasChangelog": 0,
     "sources": [
       {
-        "name": "Asura Scans",
+        "name": "Asura Scans X",
         "lang": "en",
-        "id": "6247824327199706550",
+        "id": "6694272628475835150",
         "baseUrl": "https://asuracomic.net",
         "versionId": 1
       }
