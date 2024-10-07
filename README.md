@@ -1,34 +1,29 @@
 ### Please give the repo a :star:
 
-| Build | Official Server |
-|-------|---------|
-| [![CI](https://github.com/tachiyomiorg/tachiyomi-extensions/workflows/CI/badge.svg?event=push)](https://github.com/tachiyomiorg/tachiyomi-extensions/actions/workflows/build_push.yml) | [![Discord](https://img.shields.io/discord/349436576037732353.svg?label=discord&labelColor=7289da&color=2c2f33&style=flat)](https://discord.gg/tachiyomi) |
+| Build                                                                                                                                                                               | Support Server                                                                                                                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [![CI](https://github.com/keiyoushi/extensions-source/actions/workflows/build_push.yml/badge.svg)](https://github.com/keiyoushi/extensions-source/actions/workflows/build_push.yml) | [![Discord](https://img.shields.io/discord/1193460528052453448.svg?label=discord&labelColor=7289da&color=2c2f33&style=flat)](https://discord.gg/3FbCpdKbdY) |
 
-# ![app icon](./.github/readme-images/app-icon.png)Tachiyomi Extensions
-Tachiyomi is a free and open source manga reader for Android 6.0 and above.
+# Usage
 
-## Guide
+[Getting started](https://keiyoushi.github.io/docs/guides/getting-started#adding-the-extension-repo)
 
-### Tachiyomi v0.15+:
-1. Go to More → Settings → Browse
-2. Tap on "Extension repos" and then "Add" button at bottom
-3. Input "https://raw.githubusercontent.com/riztard/tachiyomi-extensions/repo/index.min.json"
-4. Enjoy!
+# Requests
 
-### TachiyomiSY:
-1. Go to More → Settings → Browse
-2. Tap on "Edit repos" and then "Add" button at bottom
-3. Input "riztard/tachiyomi-extensions"
-4. Enjoy!
+To request a new source or bug fix, [create an issue](https://github.com/keiyoushi/extensions-source/issues/new/choose).
 
-### TachiyomiAZ:
-1. Go to Settings → Browse
-2. Tap on "Edit repos" and then "+" button at bottom
-3. Input "riztard/tachiyomi-extensions"
-4. Enjoy!
+Please note that creating an issue does not mean that the source will be added or fixed in a timely
+fashion, because the work is volunteer-based. Some sources may also be impossible to do or prohibitively
+difficult to maintain.
 
-## Others:
-- If you're not using any of the above fork or if you prefer to directly download the APK files, they are available in this GitHub repository in the [`repo` branch](https://github.com/riztard/tachiyomi-extensions/tree/repo/apk).
+If you would like to see a request fulfilled and have the necessary skills to do so, consider contributing!
+Issues are up-for-grabs for any developer if there is no assigned user already.
+
+# Contributing
+
+Contributions are welcome!
+
+Check out the repo's [issue backlog](https://github.com/keiyoushi/extensions-source/issues) for source requests and bug reports.
 
 ## License
 
@@ -48,4 +43,8 @@ Tachiyomi is a free and open source manga reader for Android 6.0 and above.
 
 ## Disclaimer
 
-The developer of this application does not have any affiliation with the content providers available.
+This project does not have any affiliation with the content providers available.
+
+This project is not affiliated with Mihon/Tachiyomi. Don't ask for help about these extensions at the
+official support means of Mihon/Tachiyomi. All credits to the codebase goes to the original contributors.
+
