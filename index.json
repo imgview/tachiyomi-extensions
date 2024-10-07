@@ -724,20 +724,40 @@
     ]
   },
   {
-    "name": "Tachiyomi: Rizz Comic",
-    "pkg": "eu.kanade.tachiyomi.extension.en.rizzcomic",
-    "apk": "tachiyomi-en.rizzcomic-v1.4.35.apk",
+    "name": "Tachiyomi: Manga Updates",
+    "pkg": "eu.kanade.tachiyomi.extension.en.mangaupdates",
+    "apk": "tachiyomi-en.mangaupdates-v1.4.6.apk",
     "lang": "en",
-    "code": 35,
-    "version": "1.4.35",
+    "code": 6,
+    "version": "1.4.6",
     "nsfw": 0,
     "hasReadme": 0,
     "hasChangelog": 0,
     "sources": [
       {
-        "name": "Rizz Comic",
+        "name": "Manga Updates",
         "lang": "en",
-        "id": "1222303582140858680",
+        "id": "1804039415352272629",
+        "baseUrl": "https://www.mangaupdates.com",
+        "versionId": 1
+      }
+    ]
+  },
+  {
+    "name": "Tachiyomi: Rizz Comic X",
+    "pkg": "eu.kanade.tachiyomi.extension.en.rizzcomicx",
+    "apk": "tachiyomi-en.rizzcomicx-v1.4.57.apk",
+    "lang": "en",
+    "code": 57,
+    "version": "1.4.57",
+    "nsfw": 0,
+    "hasReadme": 0,
+    "hasChangelog": 0,
+    "sources": [
+      {
+        "name": "Rizz Comic X",
+        "lang": "en",
+        "id": "2732187022081607641",
         "baseUrl": "https://rizzfables.com",
         "versionId": 2
       }
