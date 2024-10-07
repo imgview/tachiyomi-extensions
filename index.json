@@ -784,21 +784,21 @@
     ]
   },
   {
-    "name": "Tachiyomi: Shinigami",
-    "pkg": "eu.kanade.tachiyomi.extension.id.shinigami",
-    "apk": "tachiyomi-id.shinigami-v1.4.62.apk",
+    "name": "Tachiyomi: Shinigami X",
+    "pkg": "eu.kanade.tachiyomi.extension.id.shinigamix",
+    "apk": "tachiyomi-id.shinigamix-v1.4.8.apk",
     "lang": "id",
-    "code": 62,
-    "version": "1.4.62",
+    "code": 8,
+    "version": "1.4.8",
     "nsfw": 0,
     "hasReadme": 0,
     "hasChangelog": 0,
     "sources": [
       {
-        "name": "Shinigami",
+        "name": "Shinigami X",
         "lang": "id",
-        "id": "3411809758861089969",
-        "baseUrl": "https://shinigami05.com",
+        "id": "8285234031960655796",
+        "baseUrl": "https://shinigami03.com",
         "versionId": 1
       }
     ]
