@@ -46,10 +46,13 @@ data class ShinigamiXChapterDto(
     fun getParsedDate(): Date? {
         return try {
             when {
-                // Parsing format "hour ago"
-                date.contains("hour ago", ignoreCase = true) -> Calendar.getInstance().apply {
-                    add(Calendar.HOUR, -1)
-                }.time
+                // Parsing format "2 hours ago"
+                date.contains("hours ago", ignoreCase = true) -> {
+                    val hoursAgo = date.split(" ")[0].toIntOrNull() ?: return null
+                    Calendar.getInstance().apply {
+                        add(Calendar.HOUR, -hoursAgo)
+                    }.time
+                }
                 
                 // Parsing format "yesterday"
                 date.contains("yesterday", ignoreCase = true) -> Calendar.getInstance().apply {
