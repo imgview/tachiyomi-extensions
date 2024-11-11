@@ -10,14 +10,14 @@ on:
       extension:
         description: Target extension name
         required: true
-        default: komikucom
+        default: shinigamix
       git-repo:
         description: Git repo (Optional, defaults to <your name>/aniyomi-extensions
-        default: 'imgview/ext'
+        default: 'imgview/tachiyomi-extensions'
         required: false
       git-ref:
         description: Git Ref (Optional, defaults to master)
-        default: 'main'
+        default: 'riz-ext'
         required: false
 
 env:
