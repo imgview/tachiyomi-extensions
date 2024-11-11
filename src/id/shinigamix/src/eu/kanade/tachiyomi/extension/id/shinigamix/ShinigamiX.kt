@@ -27,7 +27,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
-import java.util.Locale
+import android.text.format.DateUtils
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -207,11 +208,38 @@ class ShinigamiX : ConfigurableSource, HttpSource() {
 
     override fun chapterListRequest(manga: SManga): Request = mangaDetailsRequest(manga)
 
-    override fun chapterListParse(response: Response): List<SChapter> {
-        val result = response.parseAs<ShinigamiXChapterListDto>()
+override fun chapterListParse(response: Response): List<SChapter> {
+    val result = response.parseAs<ShinigamiXChapterListDto>()
+    
+    return result.chapterList?.map { chapter ->
+        chapterFromObject(chapter).apply {
+            // Misalkan chapter.date berisi waktu dalam format "5 hours ago"
+            val timeInMillis = parseRelativeTimeToMillis(chapter.date)
+            date_upload = timeInMillis
+        } 
+    } ?: emptyList()
+}
 
-        return result.chapterList!!.map(::chapterFromObject)
+// Fungsi untuk mengonversi waktu relatif menjadi timestamp
+fun parseRelativeTimeToMillis(relativeTime: String): Long {
+    val currentTime = System.currentTimeMillis()
+    return try {
+        // Gunakan DateUtils untuk mengonversi waktu relatif menjadi milidetik
+        val relativeMillis = DateUtils.parseRelativeTimeSpanString(relativeTime, currentTime, DateUtils.MINUTE_IN_MILLIS).toString()
+        currentTime - relativeMillis.toLong()
+    } catch (e: Exception) {
+        currentTime // Jika gagal, gunakan waktu saat ini
     }
+}
+
+// Fungsi untuk memetakan objek chapter ke dalam format SChapter
+fun chapterFromObject(chapter: Chapter): SChapter {
+    return SChapter().apply {
+        title = chapter.title
+        url = chapter.url
+        // Anda bisa menambahkan properti lain dari chapter di sini
+    }
+}
 
     private fun chapterFromObject(obj: ShinigamiXChapterDto): SChapter = SChapter.create().apply {
         name = obj.name
